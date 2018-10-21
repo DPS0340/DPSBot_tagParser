@@ -1,7 +1,6 @@
 class tag:
     def __init__(self, name: str, command: str, context: str, argsdict: dict):
         self.name = name
-        print("커맨드", command)
         command = command.strip()
         self.choose(command, name, context=context)
         self.context = context
@@ -71,13 +70,9 @@ class tag:
 
     def equalplus(self):
         def calculate(args: str, argsdict: dict):
-            print("이퀄플러스", args)
             args = args.split()
             name = args[0]
-            print(argsdict)
-            print(self.argsdict)
             value = argsdict.get("%s" % name)
-            print(value)
             result = float(value)
             for arg in args[1:]:
                 result += float(arg)
@@ -86,11 +81,7 @@ class tag:
                     result = int(result)
             except:
                 pass
-            print("name is", name)
-            print(result)
-            print(self.argsdict.get("%s" % name))
             self.argsdict.update({name:str(result)})
-            print(self.argsdict.get("%s" % name))
             return result
         return calculate
 
@@ -151,21 +142,13 @@ class tag:
     def ifCheck(self):
         def ifChecksemi(args: str, argsdict: dict):
             firstArg = args[0:args.find("equal")].strip()
-            print(firstArg)
-            if firstArg.find("(") != -1:
-                firstArg += ")"
-            print(firstArg + "퍼스트아그")
+            if firstArg.find("(") != -1 and firstArg.find(")") == -1:
+                firstArg + ")"
             firstArg = run(firstArg, "", argsdict)
             secondArg = args[args.find("equal") + 5:args.find("do")].strip()
-            if len(secondArg.split()) < 1:
-                command = secondArg[1:-1].split()[0]
-            else:
-                command = ""
             secondArg = run(secondArg, "", argsdict)
             thirdArg = args[args.find("do") + 2:args.find("else")].strip()
             fourthArg = args[args.find("else") + 4:].strip()
-            print("포스아그", fourthArg)
-            print("포스아그", fourthArg)
             if firstArg == secondArg:
                 thirdArg = run(thirdArg, "", argsdict)
                 return thirdArg
@@ -176,26 +159,18 @@ class tag:
 
     def setVariable(self):
         def semi(args: str, argsdict:dict):
-            print("dd")
-            print(args)
             if len(args.split()) > 2:
-                print("more 2")
-                print("line", args)
                 line = args.strip()
                 args = args.split()
                 name = args[0]
                 value = line.replace(name + " ", "", 1)
-                print(value)
                 self.argsdict.update({name:str(value)})
-                print(argsdict)
                 return ""
             elif len(args.split()) == 2:
-                print("2")
                 args = args.split()
                 name = args[0]
                 value = args[1]
                 self.argsdict.update({name:str(value)})
-                print(argsdict)
                 return ""
             else:
                 return ""
@@ -206,13 +181,9 @@ class tag:
 
     def useVariable(self):
         def useVar(args: str, argsdict: dict):
-            print(argsdict)
-            print(args)
             line = args
             for key in argsdict.keys():
                 line = line.replace(key, argsdict[key])
-            print(line)
-            print("유즈바!")
             return line
         return useVar
 
@@ -257,15 +228,12 @@ class tag:
             self.func = self.nocommand(context)
 
     def run(self, args: str, argsdict: dict):
-        print("런", args)
         args = args.strip()
         args = args.replace("(", "", 1)
-        args = args.replace(")", "", 1)
+        args = args[::-1].replace(")", "", 1)[::-1]
         args = args.strip()
-        print(args)
         if len(args.split()) > 1:
             args = args.replace(args.split()[0], "", 1)
-        print(args)
         return self.func(args, argsdict)
         
 
@@ -299,7 +267,6 @@ def declareschecker(rawline, num=0):
         return num
 
 def run(rawline: str, args="", argsdict={}):
-    print(rawline)
     rawline = rawline.strip()
     rawline = rawline.replace("input", args)
     if len(rawline.split()) <= 1:
@@ -318,41 +285,26 @@ def run(rawline: str, args="", argsdict={}):
             return rawline
         elif max(depthList) != -1:
             if True:
-                print("현재 "+ rawline)
                 semiTag = rawline[:depthList.index(1, depthList.index(1) + 1) + 1]
-                print("현재 " + semiTag)
                 if rawline.find("(if") == 0 or rawline.find("(declare") == 0:
-                    print("디클레어")
                     mode = semiTag[1:-1].split()[0]
-                    print("모드", mode)
                     Tag = tag(Name, mode, semiTag, argsdict)
                     argsdict.update(Tag.argsdict)
                     result = Tag.run(semiTag, argsdict)
                     argsdict.update(Tag.argsdict)
                     rawline = rawline.replace(semiTag, result, 1)
                     return run(rawline, args, argsdict)
-                print(checkDepth(semiTag))
-                print(max(checkDepth(semiTag)))
                 startnumsemi = checkDepth(semiTag).index(
                         max(checkDepth(semiTag)))
-                print(startnumsemi)
                 endnumsemi = checkDepth(semiTag).index(
                         max(checkDepth(semiTag)), startnumsemi+1)
-                print("스타트넘", startnumsemi)
-                print("엔드넘", endnumsemi)
-                print("세미태그", semiTag)
                 useTag = semiTag[startnumsemi:endnumsemi+1]
-                print("유즈태그", useTag)
                 mode = useTag[1:-1].split()[0]
-                print("모드", mode)
                 Tag = tag(Name, mode, useTag, argsdict)
-                print(argsdict)
                 result = Tag.run(useTag, argsdict)
                 argsdict.update(Tag.argsdict)
-                print("결과", result)
                 Temptag = semiTag.replace(useTag, str(result), 1)
                 rawline = rawline.replace(semiTag, Temptag, 1)
-                print(argsdict)
                 return run(rawline, args, argsdict)
         else:
             return rawline

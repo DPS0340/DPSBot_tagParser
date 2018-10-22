@@ -1,3 +1,4 @@
+import random
 class tag:
     def __init__(self, name: str, command: str, context: str, argsdict: dict):
         self.name = name
@@ -8,9 +9,33 @@ class tag:
         self.functions = {}
         self.argsdict = argsdict
 
+    def randchoice(self):
+        def calculate(args: str, argsdict: dict):
+            result = random.choice(args.split())
+            result = result.replace("_", " ")
+            return result
+        return calculate
+
+    def string(self):
+        def calculate(args: str, argsdict: dict):
+            args = args.replace(" ", "_")
+            return args
+        return calculate
+
+    def setrange(self):
+        def calculate(args: str, argsdict: dict):
+            args = args.split()
+            result = ""
+            for i in range(int(args[0]), int(args[1])+1):
+                if i != int(args[1]):
+                    result += str(i) + " "
+                else:
+                    result += str(i)
+            return result
+        return calculate
+
     def plus(self):
         def calculate(args: str, argsdict:dict):
-            print(args)
             args = args.split()
             result = 0
             for arg in args:
@@ -29,9 +54,7 @@ class tag:
     def minus(self):
         def calculate(args: str, argsdict:dict):
             args = args.split()
-            result = 0
-            for arg in args:
-                result -= float(arg)
+            result = float(args[0]) - float(args[1])
             try:
                 if result.is_integer():
                     result = int(result)
@@ -73,15 +96,13 @@ class tag:
             args = args.split()
             name = args[0]
             value = argsdict.get("%s" % name)
-            result = float(value)
-            for arg in args[1:]:
-                result += float(arg)
+            result = float(value) + float(arg)
             try:
                 if result.is_integer():
                     result = int(result)
             except:
                 pass
-            self.argsdict.update({name:str(result)})
+            self.argsdict.update({name: str(result)})
             return result
         return calculate
 
@@ -89,45 +110,47 @@ class tag:
     def equalminus(self):
         def calculate(args: str, argsdict: dict):
             args = args.split()
-            parser = self.useVariable()
-            value = int(parser(args[0], argsdict))
-            result = float(value) - float(args[1])
+            name = args[0]
+            value = argsdict.get("%s" % name)
+            result = float(value)
+            result = value - float(args[1])
             try:
                 if result.is_integer():
                     result = int(result)
             except:
                 pass
+            self.argsdict.update({name: str(result)})
             return result
         return calculate
 
     def equalmultiply(self):
         def calculate(args: str, argsdict: dict):
-            parser = self.useVariable()
-            value = int(parser(args[0], argsdict))
+            args = args.split()
+            name = args[0]
+            value = argsdict.get("%s" % name)
             result = 1
-            result *= float(value)
-            for arg in args[1:]:
-                result *= float(arg)
+            result = float(value) * float(args[1])
             try:
                 if result.is_integer():
                     result = int(result)
             except:
                 pass
+            self.argsdict.update({name: str(result)})
             return result
         return calculate
 
     def equaldivide(self):
         def calculate(args: str, argsdict:dict):
-            parser = self.useVariable()
-            value = int(parser(args[0], argsdict))
-            result = float(value)
-            for arg in args[1:]:
-                result /= float(arg)
+            args = args.split()
+            name = args[0]
+            value = argsdict.get("%s" % name)
+            result = float(value) / float(args[1])
             try:
                 if result.is_integer():
                     result = int(result)
             except:
                 pass
+            self.argsdict.update({name: str(result)})
             return result
         return calculate
 
@@ -209,10 +232,8 @@ class tag:
         elif command == "return":
             self.func = self.selfReturn()
         elif command == "declare" or command == "equal":
-            print("셋")
             self.func = self.setVariable()
         elif command == "use":
-            print("유즈")
             self.func = self.useVariable()
         elif command == "if":
             self.func = self.ifCheck()
@@ -224,6 +245,12 @@ class tag:
             self.func = self.equalmultiply()
         elif command == "/=":
             self.func = self.equaldivide()
+        elif command == "randchoice":
+            self.func = self.randchoice()
+        elif command == "range":
+            self.func = self.setrange()
+        elif command == "string" or command == "str":
+            self.func = self.string()
         else:
             self.func = self.nocommand(context)
 

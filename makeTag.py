@@ -25,13 +25,17 @@ class tag:
     def setrange(self):
         def calculate(args: str, argsdict: dict):
             args = args.split()
+            resultrange = range(int(args[0]), int(args[1])+1)
             result = ""
-            for i in range(int(args[0]), int(args[1])+1):
-                if i != int(args[1]):
-                    result += str(i) + " "
-                else:
-                    result += str(i)
-            return result
+            if len(resultrange) > 1000:
+                return "Error:Range over 1000"
+            else:
+                for i in resultrange:
+                    if i != int(args[1]):
+                        result += str(i) + " "
+                    else:
+                        result += str(i)
+                return result
         return calculate
 
     def plus(self):
@@ -96,7 +100,7 @@ class tag:
             args = args.split()
             name = args[0]
             value = argsdict.get("%s" % name)
-            result = float(value) + float(arg)
+            result = float(value) + float(args[1])
             try:
                 if result.is_integer():
                     result = int(result)

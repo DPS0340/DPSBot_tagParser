@@ -1,4 +1,4 @@
-import random
+mport random
 class tag:
     def __init__(self, name: str, command: str, context: str, argsdict: dict):
         self.name = name
@@ -299,7 +299,6 @@ def declareschecker(rawline, num=0):
 
 def run(rawline: str, args="", argsdict={}):
     rawline = rawline.strip()
-    rawline = rawline.replace("input", args)
     if len(rawline.split()) <= 1:
         return rawline
     else:
@@ -307,6 +306,9 @@ def run(rawline: str, args="", argsdict={}):
             rawline = rawline.replace("디피 maketag ", "", 1)
             Name = nameParse(rawline)
             rawline = rawline.replace(Name + " ", "", 1)
+            rawline = rawline.replace("rawinput", args)
+            for arg in args.split():
+                rawline = rawline.replace("input", arg, 1)
         else:
             Name = ""
         depthList = checkDepth(rawline)
